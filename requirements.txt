@@ -1,0 +1,48 @@
+# Core
+numpy>=1.24
+pandas>=2.0
+scikit-learn>=1.2
+scipy>=1.10
+
+# Kafka client
+kafka-python>=2.0
+confluent-kafka>=2.1.1
+
+# Spark
+pyspark==3.4.1
+
+# Deep learning
+torch>=2.0
+torchvision>=0.15
+
+# Model serving / inference
+fastapi>=0.95
+uvicorn[standard]>=0.22
+aiohttp>=3.8
+
+# For image/video handling
+opencv-python-headless>=4.7
+ffmpeg-python==0.2.0
+
+# Serialization / Avro (optional)
+fastavro>=1.6
+avro-python3>=1.10
+
+# DB / storage
+sqlalchemy>=2.0
+psycopg2-binary>=2.9
+
+# Utils
+pyyaml>=6.0
+python-dotenv>=1.0
+loguru>=0.7
+tqdm>=4.65
+
+# Monitoring / metrics
+prometheus-client>=0.16
+
+#Bytetrack
+# git+https://github.com/ifzhang/ByteTrack.git@main#egg=bytetrack
+
+# Optional: if using TorchServe / torchscript: add relevant libs
+# Optional: Airflow (if you include in compose, install separately)
