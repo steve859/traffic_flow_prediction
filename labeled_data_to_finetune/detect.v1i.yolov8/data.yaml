@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 1
+names: ['motorbike']
+
+roboflow:
+  workspace: nguyen-hong-quan-koynt
+  project: detect-przzi
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/nguyen-hong-quan-koynt/detect-przzi/dataset/1

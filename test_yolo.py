@@ -15,13 +15,13 @@ from ultralytics import YOLO
 # =========================
 
 # Path to custom YOLO model
-MODEL_PATH = r"D:\Code\traffic_flow_prediction\vision\detector\yolov8s.pt"
+MODEL_PATH = r"D:\Code\traffic_flow_prediction\vision\detector\yolov8s_motorbike_best.pt"
 
 # Path to one camera folder
 IMAGE_DIR = r"D:\Code\traffic_flow_prediction\data\cam1"
 
 # Output folder
-OUTPUT_DIR = r"D:\Code\traffic_flow_prediction\yolov8_test_output"
+OUTPUT_DIR = r"D:\Code\traffic_flow_prediction\yolov8_motobike"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # Resize before inference (important for low-res cameras)
