@@ -1,0 +1,18 @@
+    "cam1": "https://www.giaothong.hochiminhcity.gov.vn/expandcameraplayer/?camId=5d8cdbdc766c88001718896a&camLocation=Ho%C3%A0ng%20V%C4%83n%20Th%E1%BB%A5%20-%20C%E1%BB%99ng%20H%C3%B2a&camMode=camera&videoUrl=https://d2zihajmogu5jn.cloudfront.net/bipbop-advanced/bipbop_16x9_variant.m3u8",
+    "cam2": "https://www.giaothong.hochiminhcity.gov.vn/expandcameraplayer/?camId=587476e3b807da0011e33cee&camLocation=C%E1%BB%99ng%20H%C3%B2a%20-%20%C3%9At%20T%E1%BB%8Bch%201&camMode=camera&videoUrl=https://d2zihajmogu5jn.cloudfront.net/bipbop-advanced/bipbop_16x9_variant.m3u8",
+    "cam3": "https://www.giaothong.hochiminhcity.gov.vn/expandcameraplayer/?camId=58ad6214bd82540010390be2&camLocation=C%E1%BB%99ng%20H%C3%B2a%20-%20Ho%C3%A0ng%20Hoa%20Th%C3%A1m&camMode=camera&videoUrl=https://d2zihajmogu5jn.cloudfront.net/bipbop-advanced/bipbop_16x9_variant.m3u8",
+    "cam4": "https://www.giaothong.hochiminhcity.gov.vn/expandcameraplayer/?camId=662b57471afb9c00172d9095&camLocation=C%E1%BB%99ng%20H%C3%B2a%20-%20%E1%BA%A4p%20B%E1%BA%AFc&camMode=camera&videoUrl=https://d2zihajmogu5jn.cloudfront.net/bipbop-advanced/bipbop_16x9_variant.m3u8",
+    "cam5": "https://www.giaothong.hochiminhcity.gov.vn/expandcameraplayer/?camId=586e1f18f9fab7001111b0a5&camLocation=C%E1%BB%99ng%20H%C3%B2a%20-%20Tr%C6%B0%E1%BB%9Dng%20Chinh&camMode=camera&videoUrl=https://d2zihajmogu5jn.cloudfront.net/bipbop-advanced/bipbop_16x9_variant.m3u8",
+    "cam6": "https://www.giaothong.hochiminhcity.gov.vn/expandcameraplayer/?camId=586e25e1f9fab7001111b0ae&camLocation=Tr%C6%B0%E1%BB%9Dng%20Chinh%20-%20T%C3%A2n%20K%E1%BB%B3%20T%C3%A2n%20Qu%C3%BD&camMode=camera&videoUrl=http://camera.thongtingiaothong.vn/s/586e25e1f9fab7001111b0ae/index.m3u8",
+    "cam7": "https://www.giaothong.hochiminhcity.gov.vn/expandcameraplayer/?camId=56df807bc062921100c143da&camLocation=Tr%C6%B0%E1%BB%9Dng%20Chinh%20-%20%C3%82u%20C%C6%A1&camMode=camera&videoUrl=https://d2zihajmogu5jn.cloudfront.net/bipbop-advanced/bipbop_16x9_variant.m3u8",
+    "cam8": "https://www.giaothong.hochiminhcity.gov.vn/expandcameraplayer/?camId=587478d8b807da0011e33cf3&camLocation=N%C3%BAt%20giao%20B%E1%BA%A3y%20Hi%E1%BB%81n%201%20(C%C3%A1ch%20M%E1%BA%A1ng%20Th%C3%A1ng%20T%C3%A1m)&camMode=camera&videoUrl=https://d2zihajmogu5jn.cloudfront.net/bipbop-advanced/bipbop_16x9_variant.m3u8",
+
+    cam1 - Hoang Van Thu - Cong Hoa {x: "106.66078135371208", y: "10.80071000917009"}
+    cam2 - Cong Hoa - Ut tich {x: "106.65788859128952", y: "10.801032758949276"}
+    cam3 - Cong Hoa - Hoang Hoa Tham {x: "106.64736360311508", y: "10.801272515703587"}
+    cam4 - Cong Hoa - Ap Bac {x: "106.64152711629868", y: "10.802405429645702"}
+    cam5 - Cong Hoa - Truong Chinh {x: "106.63496643304825", y: "10.807016081822823"}
+    cam6 - Truong Chinh - Tan Ky Tan Quy {x: "106.63591861724854", y: "10.803735939399289"}
+    cam7 - Truong Chinh - Au Co {x: "106.63651406764984", y: "10.801952264581729"}
+    cam8 - Nga Tu Bay Hien {x: "106.65360778570175", y: "10.792883550206625"}
+ 
