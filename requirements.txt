@@ -20,6 +20,10 @@ fastapi>=0.95
 uvicorn[standard]>=0.22
 aiohttp>=3.8
 
+# Dashboard
+streamlit>=1.30
+plotly>=5.18
+
 # For image/video handling
 opencv-python-headless>=4.7
 ffmpeg-python==0.2.0

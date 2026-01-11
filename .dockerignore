@@ -1,0 +1,23 @@
+.git
+.gitignore
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+.venv/
+venv/
+.env
+
+# Big / non-runtime assets
+labeled_data_to_finetune/
+data/raw_images/
+yolov8_test_output/
+model/notebooks/
+vision/__pycache__/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
