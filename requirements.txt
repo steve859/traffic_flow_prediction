@@ -28,6 +28,9 @@ plotly>=5.18
 opencv-python-headless>=4.7
 ffmpeg-python==0.2.0
 
+# YOLO
+ultralytics>=8.0
+
 # Serialization / Avro (optional)
 fastavro>=1.6
 avro-python3>=1.10
