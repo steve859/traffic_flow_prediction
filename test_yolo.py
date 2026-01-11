@@ -10,18 +10,20 @@ import cv2
 import torch
 from ultralytics import YOLO
 
+
+
 # =========================
 # CONFIG (WINDOWS PATHS)
 # =========================
 
 # Path to custom YOLO model
-MODEL_PATH = r"D:\Code\traffic_flow_prediction\vision\detector\yolov8s_motorbike_best.pt"
+MODEL_PATH = r"D:\Code\bigdata\traffic_flow_prediction\vision\detector\yolov8n_multiclass_best.pt"
 
 # Path to one camera folder
-IMAGE_DIR = r"D:\Code\traffic_flow_prediction\data\cam1"
+IMAGE_DIR = r"D:\Code\bigdata\traffic_flow_prediction\data\cam1"
 
 # Output folder
-OUTPUT_DIR = r"D:\Code\traffic_flow_prediction\yolov8_motobike"
+OUTPUT_DIR = r"D:\Code\bigdata\traffic_flow_prediction\yolov8_multiclass_output"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # Resize before inference (important for low-res cameras)

@@ -47,23 +47,6 @@ services:
     ports:
       - "8080:8080"
 
-  cassandra:
-    image: cassandra:4.1
-    container_name: cassandra
-    ports:
-      - "9042:9042"
-    environment:
-      CASSANDRA_CLUSTER_NAME: TrafficCluster
-      CASSANDRA_DC: DC1
-      CASSANDRA_ENDPOINT_SNITCH: GossipingPropertyFileSnitch
-    volumes:
-      - cassandra_data:/var/lib/cassandra
-    healthcheck:
-      test: ["CMD-SHELL", "cqlsh -e 'describe keyspaces'"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   redis:
     image: redis:7
     container_name: redis
@@ -134,12 +117,34 @@ services:
     depends_on:
       - kafka
 
+  consumer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: traffic_consumer
+    command: ["bash", "-c", "python app/consumer/kafka_consumer.py"]
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      KAFKA_TOPIC: traffic_raw_data
+      KAFKA_GROUP_ID: traffic_consumer
+      KAFKA_AUTO_OFFSET_RESET: earliest
+      AGGREGATE_WINDOW_SECONDS: 60
+      OUTPUT_DIR: /app/data/consumer_output
+      FORWARD_INFERENCE_URL: http://inference-api:5002/predict
+      KAFKA_PRED_TOPIC: predictions
+      TZ: Asia/Ho_Chi_Minh
+    volumes:
+      - ./:/app
+    depends_on:
+      - kafka
+      - inference-api
+
   streamlit:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: traffic_dashboard
-    command: ["bash", "-c", "streamlit run app.py --server.port 8501 --server.address 0.0.0.0"]
+    command: ["bash", "-c", "streamlit run app/streamlit_app.py --server.port 8501 --server.address 0.0.0.0"]
     environment:
       DATA_DIR: /app/data
       TZ: Asia/Ho_Chi_Minh
@@ -148,11 +153,8 @@ services:
     volumes:
       - ./:/app
     depends_on:
-      cassandra:
-        condition: service_healthy
       inference-api:
         condition: service_started
 
 volumes:
-  cassandra_data:
   redis-data:
