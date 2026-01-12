@@ -19,8 +19,14 @@ uploaded_pred = st.sidebar.file_uploader("Tải file prediction.csv", type="csv"
 # --- 1. Xử lý dữ liệu ---
 if uploaded_flow and uploaded_pred:
     flow_df = pd.read_csv(uploaded_flow)
+  
+    flow_df['timestamp_vn'] = pd.to_datetime(flow_df['timestamp_vn'])
+    flow_df['slot_idx'] = flow_df['timestamp_vn'].dt.hour
+
+
     pred_df = pd.read_csv(uploaded_pred)
-    
+  
+
     # Tính tổng lưu lượng
     flow_df['total_flow'] = flow_df[['motorbike', 'car', 'bus', 'truck']].sum(axis=1)
     
