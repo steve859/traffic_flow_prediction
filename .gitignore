@@ -2,4 +2,5 @@
 /vision/detector
 /yolov8_motorbike
 /yolov8_test_output
+/data_to_demo
 .venv

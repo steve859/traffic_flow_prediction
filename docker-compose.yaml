@@ -47,16 +47,39 @@ services:
     ports:
       - "8080:8080"
 
-  redis:
-    image: redis:7
-    container_name: redis
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    environment:
+      POSTGRES_DB: traffic
+      POSTGRES_USER: traffic
+      POSTGRES_PASSWORD: traffic
+      TZ: Asia/Ho_Chi_Minh
     ports:
-      - "6379:6379"
+      - "5432:5432"
     volumes:
-      - redis-data:/data
+      - pg-data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+  pgadmin:
+    image: dpage/pgadmin4:8
+    container_name: pgadmin1
+    environment:
+      PGADMIN_DEFAULT_EMAIL: nguyenhongquan.work@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      TZ: Asia/Ho_Chi_Minh
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      - postgres
 
   spark-master:
-    image: apache/spark:3.5.0
+    build:
+      context: .
+      dockerfile: Dockerfile.spark
     container_name: spark-master
     command: >
       /opt/spark/bin/spark-class
@@ -66,11 +89,15 @@ services:
       - "7077:7077"
     volumes:
       - ./spark-apps:/opt/spark-apps
+      - ./:/opt/project
+      - ./data/spark-checkpoints:/opt/spark-checkpoints
     depends_on:
       - kafka
 
   spark-worker-1:
-    image: apache/spark:3.5.0
+    build:
+      context: .
+      dockerfile: Dockerfile.spark
     container_name: spark-worker-1
     command: >
       /opt/spark/bin/spark-class
@@ -83,6 +110,49 @@ services:
       - spark-master
     volumes:
       - ./spark-apps:/opt/spark-apps
+      - ./:/opt/project
+      - ./data/spark-checkpoints:/opt/spark-checkpoints
+
+  spark-predictor:
+    build:
+      context: .
+      dockerfile: Dockerfile.spark
+    container_name: spark-predictor
+    command:
+      - /opt/spark/bin/spark-submit
+      - --master
+      - spark://spark-master:7077
+      - --jars
+      - /opt/spark-jars/spark-sql-kafka-0-10_2.12-3.5.0.jar,/opt/spark-jars/spark-token-provider-kafka-0-10_2.12-3.5.0.jar,/opt/spark-jars/kafka-clients-3.4.1.jar,/opt/spark-jars/commons-pool2-2.11.1.jar,/opt/spark-jars/postgresql-42.7.3.jar
+      - /opt/spark-apps/stgcn_streaming_job.py
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      KAFKA_TOPIC: traffic_counts_raw
+      KAFKA_STARTING_OFFSETS: earliest
+      KAFKA_FAIL_ON_DATA_LOSS: "false"
+      WINDOW_SECONDS: 60
+      STGCN_INPUT_LEN: 4
+      STGCN_HORIZON: 1
+      PROJECT_DIR: /opt/project
+      STGCN_MODEL_PATH: /opt/project/model/stgcn_hcm_final.pt
+      ADJ_MATRIX_PATH: /opt/project/adj_matrix.npy
+      SCALER_PARAMS_PATH: /opt/project/model/scaler_params.json
+      POSTGRES_JDBC_URL: jdbc:postgresql://postgres:5432/traffic
+      POSTGRES_USER: traffic
+      POSTGRES_PASSWORD: traffic
+      POSTGRES_TABLE: traffic_predictions
+      SPARK_CHECKPOINT_LOCATION: /opt/spark-checkpoints/stgcn
+      DEBUG_FOREACHBATCH: "false"
+      TZ: Asia/Ho_Chi_Minh
+    volumes:
+      - ./spark-apps:/opt/spark-apps
+      - ./:/opt/project
+      - ./spark-jars:/opt/spark-jars:ro
+      - ./data/spark-checkpoints:/opt/spark-checkpoints
+    depends_on:
+      - spark-master
+      - kafka
+      - postgres
 
   inference-api:
     build:
@@ -107,10 +177,30 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: camera_producer
-    command: ["bash", "-c", "python app/producer/camera_producer.py"]
+    command: ["bash", "-c", "python -m app.producer.producer_main"]
     environment:
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
-      KAFKA_TOPIC: traffic_raw_data
+      KAFKA_TOPIC: traffic_counts_raw
+
+      # Switch producer mode:
+      # - csv (default): replay from COUNTS_CSV
+      # - yolo: read images from DEMO_DATA_DIR and run YOLO counting
+      PRODUCER_MODE: ${PRODUCER_MODE:-csv}
+
+      COUNTS_CSV: /app/hcmc_flow.csv
+      REPLAY_SPEEDUP: 60
+
+      # YOLO folder demo config (used when PRODUCER_MODE=yolo)
+      DEMO_DATA_DIR: /app/data_to_demo
+      DEMO_GROUP_INTERVAL_SECONDS: 1
+      DEMO_LOOP: "false"
+      YOLO_MODEL_PATH: /app/vision/detector/yolov8n_multiclass_best.pt
+      YOLO_CONF: 0.25
+      YOLO_IMGSZ: 640
+      YOLO_RESIZE_W: 640
+      YOLO_RESIZE_H: 384
+      YOLO_SAVE_ANNOTATED: "false"
+      YOLO_ANNOTATED_DIR: /app/data/yolo_annotated
       TZ: Asia/Ho_Chi_Minh
     volumes:
       - ./:/app
@@ -157,4 +247,5 @@ services:
         condition: service_started
 
 volumes:
-  redis-data:
+  pg-data:
+  pgadmin-data:

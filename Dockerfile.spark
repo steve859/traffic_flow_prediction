@@ -1,0 +1,30 @@
+FROM apache/spark:3.5.0
+
+USER root
+
+# Ensure Python + pip exist
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Core deps for pandas UDF + torch inference
+# NOTE: apache/spark:3.5.0 ships with Python 3.8 on Ubuntu focal, so pin compatible versions.
+RUN pip3 install --no-cache-dir \
+    numpy==1.24.4 \
+    pandas==2.0.3 \
+    pyarrow==12.0.1
+
+# PyTorch CPU wheel (Python 3.8 compatible)
+# Use extra-index-url so non-torch deps (e.g. typing-extensions) come from PyPI.
+RUN pip3 install --no-cache-dir \
+    typing-extensions==4.10.0
+
+RUN pip3 install --no-cache-dir \
+    --extra-index-url https://download.pytorch.org/whl/cpu \
+    torch==2.1.2+cpu
+# Spark uses python3 by default, but make explicit
+ENV PYSPARK_PYTHON=python3 \
+    PYSPARK_DRIVER_PYTHON=python3
+
+USER 185
