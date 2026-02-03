@@ -55,6 +55,23 @@ def _make_producer(bootstrap_servers: str) -> KafkaProducer:
     )
 
 
+def _connect_producer(bootstrap_servers: str) -> KafkaProducer:
+    max_wait_s = _parse_float_env("KAFKA_CONNECT_MAX_WAIT_SECONDS", 60.0)
+    backoff_s = _parse_float_env("KAFKA_CONNECT_RETRY_SECONDS", 2.0)
+
+    started = time.time()
+    last_err: Optional[Exception] = None
+    while True:
+        try:
+            return _make_producer(bootstrap_servers)
+        except Exception as e:
+            last_err = e
+            if time.time() - started > max_wait_s:
+                raise
+            print(f"[yolo-folder-producer] Kafka not ready yet ({e}); retrying in {backoff_s}s...")
+            time.sleep(max(0.1, backoff_s))
+
+
 _TIMESTAMP_PATTERNS: List[re.Pattern] = [
     # 2026-01-12T13:05:00 or 2026-01-12 13:05:00
     re.compile(r"(\d{4}-\d{2}-\d{2}[T\s]\d{2}:\d{2}:\d{2})"),
@@ -262,7 +279,7 @@ def main() -> None:
     names = model.names or {}
     print(f"[yolo-folder-producer] model classes={names}")
 
-    producer = _make_producer(bootstrap)
+    producer = _connect_producer(bootstrap)
 
     def run_once() -> None:
         groups = list(_iter_groups(data_dir))

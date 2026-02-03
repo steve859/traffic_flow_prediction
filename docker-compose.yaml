@@ -47,14 +47,6 @@ services:
     ports:
       - "8080:8080"
 
-  redis:
-    image: redis:7
-    container_name: redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis-data:/data
-
   postgres:
     image: postgres:16
     container_name: postgres
@@ -71,7 +63,7 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4:8
-    container_name: pgadmin
+    container_name: pgadmin1
     environment:
       PGADMIN_DEFAULT_EMAIL: nguyenhongquan.work@gmail.com
       PGADMIN_DEFAULT_PASSWORD: admin
@@ -130,15 +122,14 @@ services:
       - /opt/spark/bin/spark-submit
       - --master
       - spark://spark-master:7077
-      - --conf
-      - spark.jars.ivy=/tmp/.ivy2
-      - --packages
-      - org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0,org.postgresql:postgresql:42.7.3
+      - --jars
+      - /opt/spark-jars/spark-sql-kafka-0-10_2.12-3.5.0.jar,/opt/spark-jars/spark-token-provider-kafka-0-10_2.12-3.5.0.jar,/opt/spark-jars/kafka-clients-3.4.1.jar,/opt/spark-jars/commons-pool2-2.11.1.jar,/opt/spark-jars/postgresql-42.7.3.jar
       - /opt/spark-apps/stgcn_streaming_job.py
     environment:
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       KAFKA_TOPIC: traffic_counts_raw
       KAFKA_STARTING_OFFSETS: earliest
+      KAFKA_FAIL_ON_DATA_LOSS: "false"
       WINDOW_SECONDS: 60
       STGCN_INPUT_LEN: 4
       STGCN_HORIZON: 1
@@ -151,10 +142,12 @@ services:
       POSTGRES_PASSWORD: traffic
       POSTGRES_TABLE: traffic_predictions
       SPARK_CHECKPOINT_LOCATION: /opt/spark-checkpoints/stgcn
+      DEBUG_FOREACHBATCH: "false"
       TZ: Asia/Ho_Chi_Minh
     volumes:
       - ./spark-apps:/opt/spark-apps
       - ./:/opt/project
+      - ./spark-jars:/opt/spark-jars:ro
       - ./data/spark-checkpoints:/opt/spark-checkpoints
     depends_on:
       - spark-master
@@ -254,6 +247,5 @@ services:
         condition: service_started
 
 volumes:
-  redis-data:
   pg-data:
   pgadmin-data:

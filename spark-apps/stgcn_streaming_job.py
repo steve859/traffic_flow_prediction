@@ -22,6 +22,14 @@ from model.stgcn_model import STGCN, load_adj_tensor, load_stgcn_state_dict  # n
 
 KAFKA_BOOTSTRAP = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:29092")
 KAFKA_TOPIC = os.getenv("KAFKA_TOPIC", "traffic_counts_raw")
+KAFKA_FAIL_ON_DATA_LOSS = os.getenv("KAFKA_FAIL_ON_DATA_LOSS", "false").strip().lower() not in {
+    "0",
+    "false",
+    "no",
+    "n",
+    "off",
+    "",
+}
 
 WINDOW_SECONDS = int(os.getenv("WINDOW_SECONDS", "60"))
 INPUT_LEN = int(os.getenv("STGCN_INPUT_LEN", "4"))
@@ -39,6 +47,7 @@ POSTGRES_TABLE = os.getenv("POSTGRES_TABLE", "traffic_predictions")
 CHECKPOINT_LOCATION = os.getenv("SPARK_CHECKPOINT_LOCATION", "/opt/spark-checkpoints/stgcn")
 
 SESSION_TZ = os.getenv("TZ", "Asia/Ho_Chi_Minh")
+DEBUG_FOREACHBATCH = os.getenv("DEBUG_FOREACHBATCH", "false").strip().lower() in {"1", "true", "yes", "on"}
 
 
 with open(SCALER_PATH, "r", encoding="utf-8") as f:
@@ -122,6 +131,13 @@ def _save_driver_state(history: List[List[float]], last_window_end: Optional[pd.
 
 
 def _write_to_postgres(batch_df, batch_id: int) -> None:  # noqa: ARG001
+    if DEBUG_FOREACHBATCH:
+        try:
+            n = batch_df.count()
+        except Exception:
+            n = -1
+        print(f"[foreachBatch] writing_to_postgres batch_id={batch_id} rows={n} table={POSTGRES_TABLE}")
+
     (
         batch_df.write.format("jdbc")
         .option("url", POSTGRES_URL)
@@ -135,7 +151,23 @@ def _write_to_postgres(batch_df, batch_id: int) -> None:  # noqa: ARG001
 
 
 def _predict_and_write_batch(batch_df, batch_id: int) -> None:  # noqa: ARG001
+    if DEBUG_FOREACHBATCH:
+        try:
+            stats = batch_df.agg(
+                F.count(F.lit(1)).alias("n"),
+                F.min("window_end").alias("min_window_end"),
+                F.max("window_end").alias("max_window_end"),
+            ).collect()[0]
+            print(
+                f"[foreachBatch] batch_id={batch_id} n={stats['n']} "
+                f"min_window_end={stats['min_window_end']} max_window_end={stats['max_window_end']}"
+            )
+        except Exception as e:
+            print(f"[foreachBatch] batch_id={batch_id} stats_failed err={e!r}")
+
     if batch_df.rdd.isEmpty():
+        if DEBUG_FOREACHBATCH:
+            print(f"[foreachBatch] batch_id={batch_id} empty_batch_df")
         return
 
     history, last_window_end = _load_driver_state()
@@ -190,6 +222,8 @@ def _predict_and_write_batch(batch_df, batch_id: int) -> None:  # noqa: ARG001
         out_pdf = pd.DataFrame(out_rows)
         out_sdf = spark.createDataFrame(out_pdf, schema=OUTPUT_SCHEMA)
         _write_to_postgres(out_sdf, batch_id)
+    elif DEBUG_FOREACHBATCH:
+        print(f"[foreachBatch] batch_id={batch_id} out_rows=0 (no predictions written)")
 
     _save_driver_state(history, last_window_end)
 
@@ -208,6 +242,7 @@ def main() -> None:
         spark.readStream.format("kafka")
         .option("kafka.bootstrap.servers", KAFKA_BOOTSTRAP)
         .option("subscribe", KAFKA_TOPIC)
+        .option("failOnDataLoss", str(KAFKA_FAIL_ON_DATA_LOSS).lower())
         .option("startingOffsets", os.getenv("KAFKA_STARTING_OFFSETS", "latest"))
         .load()
     )
